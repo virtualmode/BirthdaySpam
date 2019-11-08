@@ -1,0 +1,7 @@
+# Visual Studio:
+.vs/
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+packages/

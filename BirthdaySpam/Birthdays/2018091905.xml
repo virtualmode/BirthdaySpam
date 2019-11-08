@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<data id="0" fee="0" val="День рождения">
+  <key id="0" active="1" name="Иванов Иван Иванович" birthday="01.01.1987" department="ОРПО" email="IvanovII@elcomplus.ru" val="" fee="0" />
+  <key id="1" active="1" name="Петров Пётр Петрович" birthday="03.01.1988" department="ОРПО" email="PetrovPP@elcomplus.ru" val="" fee="250" />
+</data>

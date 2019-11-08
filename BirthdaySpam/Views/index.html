@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- HTML document must be without BOM and with apropriate DOCTYPE. -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link type="image/png" rel="icon" href="/favicon.png" sizes="16x16" />
+	<link type="image/vnd.microsoft.icon" rel="shortcut icon" href="/favicon.ico" sizes="16x16 24x24 32x32 48x48" />
+
+	<link type="text/css" rel="stylesheet" href="/Content/Styles/style.css" />
+	<script type="text/javascript" src="/Scripts/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="/Scripts/jquery.cookie.js"></script>
+	<script type="text/javascript" src="/Scripts/underscore.min.js"></script>
+	<script type="text/javascript" src="/Scripts/moment.min.js"></script>
+	<script type="text/javascript" src="/Scripts/clndr.min.js"></script>
+	<script type="text/javascript" src="/Scripts/index.js"></script>
+	<title>Birthday Spam</title>
+</head>
+<body class="no-touch">
+	<noscript>Please, turn on JavaScript!</noscript>
+	<div id="page"></div>
+	<!-- Page region for buffered scripts: -->
+	<div id="scripts">
+		<script type="text/javascript">
+			window.onload = function() {
+				if ("ontouchstart" in document) {
+					$("body").removeClass("no-touch");
+				}
+				initIndex(); // Page initialization.
+			}
+		</script>
+	</div>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!-- Settings: -->
+<form id="form-settings" class="rows" method="post" action="/" autocomplete="off"><!-- autocomplete - недокументированный способ отключить у браузеров автосохранение пароля с формы. -->
+	<div>
+		<div id="lang-name">Language:</div>
+		<div id="lang-desc" class="desc"></div>
+		<select id="language" name="language">
+			<option value="en-US">English</option>
+			<option value="ru-RU">Русский</option>
+		</select>
+		<span id="lang-err" class="error"></span>
+	</div>
+	<!--input id="btn-save" type="submit" class="const-save button"/>
+	<input id="btn-default" type="button" class="const-default button"/-->
+</form>
+
+<!-- Page scripts: -->
+<script type="text/javascript">
+	$("#tag-stngs", _page).addClass("checked");
+	$("#search-input", _page).text(getLocVal("tag-stngs"));
+	// Initialize language:
+	var lang = $.cookie("language");
+	if (!lang) lang = "ru-RU";
+	$("#language option[value='" + lang + "']", _page).attr("selected", "selected");
+	$("#language", _page).on("change", function() {
+		$.cookie("language", this.value, { expires: 365, path: "/" });
+		initIndex();
+	});
+	// Render page:
+	showPage();
+	/*// Стандартная часть страницы:
+	document.title = getLocVal("title-stngs");
+	searchInput.val(document.title);
+	
+	// Подготовка формы:
+	settingsForm($("#form-settings", _page)).done(function(jqSettings, jqLanguages) {
+		// Заполнение списка языков:
+		$(jqLanguages[0]).find("language").each(function() {
+			$("#language", _page).append($('<option value="' + $(this).attr("id") + '">' + $(this).attr("val") + '</option>'));
+		});
+		// Выбор активного языка:
+		$("#language option[value='" + getSetting("language") + "']", _page).attr("selected", "selected");
+		// Сортировка списка имеющихся языков:
+		sortSelect("#language", _page);
+		// Отображение страницы из буфера:
+		showPage();
+	});*/
+</script>

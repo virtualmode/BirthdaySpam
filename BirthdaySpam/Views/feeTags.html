@@ -1,0 +1,11 @@
+<!-- Tags: -->
+<a id="tag-fee" href="#" target="_self">Fee<span class="tag-wnd">xml</span></a>
+
+<!-- Page scripts: -->
+<script type="text/javascript">
+	// Template assembling:
+	var fileName = $.getUrlVar("file");
+	$("#tag-fee", _page).attr("href", "/fee?file=" + fileName);
+	$("#tag-fee > .tag-wnd", _page).text(fileName);
+	$("#tag-overview, #tag-fee", _page).addClass("checked");
+</script>

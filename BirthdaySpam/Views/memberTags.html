@@ -1,0 +1,45 @@
+<!-- Tags: -->
+<a id="tag-member" href="/members" target="_self">Add</a>
+
+<!-- Page scripts: -->
+<script type="text/javascript">
+	var isEditing = $.getUrlVar("id") != undefined,
+		tagMember;
+	// Localization:
+	if (isEditing)
+		tagMember = getLocVal("const-edit");
+	else
+		tagMember = getLocVal("const-add");
+	// Template assembling:
+	$("#tag-member", _page).text(tagMember);
+	$("#tag-members, #tag-member", _page).addClass("checked");
+
+	/* var request = getDecodedUrl().toLowerCase();
+	switch (request) {
+		// Other settings stuff (necessary only for old browsers without history object):
+		case getLocVal("stngs-other", 1): loadHtml("#content", "/template/settings/other.html"); break;
+		// Interface:
+		//case getLocVal("stngs-ui", 1): loadHtml("#content", "/template/settings/ui.html"); break;
+		// Network:
+		case getLocVal("stngs-net", 1): loadHtml("#content", "/template/settings/net.html"); break;
+		// Security:
+		//case getLocVal("tag-security", 1): loadHtml("#content", "/template/settings/security.html"); break;
+		case getLocVal("tag-https", 1):
+		case getLocVal("tag-security", 1): loadTags("#tag-security", "/template/settings/security/tags.html"); break;
+
+		// State-dependent pages, like general page and other settings page (only for example of using history object without url changing):
+		default:
+			if (history.pushState && history.state == "other")
+				loadHtml("#content", "/template/settings/other.html");
+			else loadHtml("#content", "/template/settings/index.html"); break;
+	}*/
+
+	/* // Setting user link event:
+	$("a#stngs-other").click(function(e) {
+		if (history.pushState) { // If we can use history object:
+			e.preventDefault(); // Link jump prevention.
+			history.pushState("other", document.title, getLocVal("tags-settings", 0)); // Добавление параметризованной записи в историю с сохранением адреса, в пределах которого происходят переходы.
+			initTemplate(); // Page creation.
+		} // Else will be used standard link event.
+	}); */
+</script>

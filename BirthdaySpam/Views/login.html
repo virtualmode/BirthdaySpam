@@ -1,0 +1,74 @@
+<!-- Login form: -->
+<form id="form-login" class="rows" method="post" action="/" autocomplete="off"><!-- autocomplete - недокументированный способ отключить у браузеров автосохранение пароля с формы. -->
+	<div>
+		<div id="login-name">Login:</div>
+		<div id="login-desc" class="desc"></div>
+		<input id="login" type="text"/>
+		<span id="login-err" class="error"></span>
+	</div>
+	<div>
+		<div id="password-name">Password:</div>
+		<div id="password-desc" class="desc"></div>
+		<input id="password" type="password"/>
+		<span id="password-err" class="error"></span>
+	</div>
+	<div class="row-buttons">
+		<a id="btn-login" href="/login" class="const-login button">Login</a>
+	</div>
+</form>
+
+<!-- Logout form: -->
+<div id="form-logout" class="rows" style="display: none">
+	<div id="logout-desc">You are logged in as administrator.</div>
+	<div class="row-buttons">
+		<a id="btn-logout" href="/login" class="const-logout button">Logout</a>
+	</div>
+</div>
+
+<!-- Page scripts: -->
+<script type="text/javascript">
+	$("#tag-login", _page).addClass("checked");
+	$("#search-input", _page).text(getLocVal("tag-login"));
+	// Login function:
+	function logIn(e) {
+		e.preventDefault();
+		$.when($.ajax({
+			type: "POST", cache: false, url: "/getSession?lastModified=" + Date.now() +
+				"&login=" + $("#login").val() +
+				"&password=" + $("#password").val(),
+			dataType: "text"
+		})).then(function(data, textStatus, jqXHR) {
+			$.cookie("session", data, { expires: 365, path: "/" });
+			goToTargetHref(e); // Update page. Already contains preventDefault().
+		});
+	};
+	// Check permissions:
+	var isLoggedIn = false;
+	$.when($.ajax({ type: "POST", cache: false, url: "/isLoggedIn?lastModified=" + Date.now(), dataType: "text" })).then(function(data, textStatus, jqXHR) {
+		if (data == "1")
+			isLoggedIn = true;
+		var session = $.cookie("session");
+		if (session && isLoggedIn) {
+			$("#form-login", _page).hide();
+			$("#form-logout", _page).show();
+			// Set logout events:
+			$("#btn-logout", _page).on("click", function(e) {
+				$.cookie("session", "", { expires: 365, path: "/" });
+				goToTargetHref(e); // Update page. Already contains preventDefault().
+			});
+		} else {
+			// Override submit:
+			$("#form-login", _page).submit(logIn);
+			$("#login, #password", _page).keyup(function(e) {
+				if (event.keyCode === 13) {
+					logIn(e);
+				}
+			});
+			// Set login events:
+			$("#btn-login", _page).off().on("click", logIn);
+		}
+		// Render page:
+		showPage();
+	}, function() { // Fail:
+	});
+</script>

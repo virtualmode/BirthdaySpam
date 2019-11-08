@@ -1,0 +1,176 @@
+<!-- Member template: -->
+<div id="member-template" style="display:none">
+	<div class="member" style="clear:both">
+		<div class="member-left"><a class="tag" href="#" target="_self">&larr;</a></div>
+		<div class="member-right"><a class="tag" href="#" target="_self">&rarr;</a></div>
+		<div class="member-text">
+			<input type="text" value="0" />
+			<div class="member-hot member250"><a class="tag" href="#" target="_self">250</a></div>
+			<div class="member-hot member50"><a class="tag" href="#" target="_self">50</a></div>
+			<div class="member-hot memberc"><a class="tag" href="#" target="_self">C</a></div>
+			<a href="#" target="_self"></a>
+		</div>
+	</div>
+</div>
+
+<!-- Member list: -->
+<div id="member-list" class="row fee"></div>
+
+<!-- Fee security information: -->
+<div id="fee-info" class="row" style="display:none"></div>
+
+<!-- Fee management buttons: -->
+<div id="management-fee" class="rows" style="display:none">
+	<div class="row">
+		<div id="fee-spent">Spent funds:</div>
+		<div class="desc"></div>
+		<input id="spent-input" type="text" name="fee-spent" value="" />
+		<span class="error"></span>
+	</div>
+	<div id="fee-buttons" class="row-buttons">
+		<a id="btn-fee-save" href="/" class="const-save button">Save</a>
+		<a id="fee-close" href="/" target="_self" class="const-close button">Close</a>
+	</div>
+</div>
+
+<!-- Page scripts: -->
+<script type="text/javascript">
+	var isLoggedIn = false,
+		globalFeeData, globalFeeRoot,
+		request = getDecodedUrl(),
+		fileName = $.getUrlVar("file"),
+		feeInfo = $("#fee-info", _page),
+		memberList = $("#member-list", _page),
+		member = $("#member-template > div", _page),
+		memberLeft = $(".member-left > a", member),
+		memberRight = $(".member-right > a", member),
+		memberText = $(".member-text > a", member),
+		memberInput = $(".member-text > input", member);
+	// Save fee diff data:
+	function saveFee(e, xmlData) {
+		if (isLoggedIn != true)
+			return;
+		globalFeeRoot.attr("fee", $("#spent-input").val()); // Update field with spent funds.
+		var current, currentFee, feeNode, feeId,
+			feeXml = $.parseXML('<?xml version="1.0" encoding="utf-8"?><data id="' + globalFeeRoot.attr("id") + '" fee="' + globalFeeRoot.attr("fee") + '" val="' + globalFeeRoot.attr("val") + '"></data>'),
+			feeData = $("data", feeXml);
+		$(".member").each(function () {
+			current = $(this);
+			currentFee = $("input", current).val();
+			feeId = current.attr("data-id");
+			feeNode = $("key[id=" + feeId + "]", xmlData);
+			if (feeNode.attr("fee") != currentFee) {
+				feeData.append('<key id="' + feeId + '" fee="' + currentFee + '"/>');
+			}
+		});
+		$.ajax({ type: "POST", cache: false, url: "/saveFee?file=" + fileName + "&lastModified=" + Date.now(), dataType: "xml", data: serializeXML(feeXml) }).fail(function () {
+			alert(getLocVal("const-error"));
+		});
+		e.preventDefault();
+	}
+	// Dynamic elements:
+	_page.on("onshow", function () {
+		$("#fee-close").off().on("click", function (e) {
+			if (confirm(getLocVal("const-johncena"))) {
+				$.ajax({ type: "POST", cache: false, url: "/closeFee?file=" + fileName + "&lastModified=" + Date.now() });
+				goToTargetHref(e); // Update page. Already contains preventDefault().
+			} else {
+				e.preventDefault();
+			}
+		});
+		$("#btn-fee-save").off().on("click", function (e) {
+			saveFee(e, globalFeeData);
+		});
+		$("#spent-input, .member-text > input").keyup(function (e) {
+			if (event.keyCode === 13) { // Enter.
+				saveFee(e, globalFeeData);
+			}
+		});
+		$(".memberc > a").off().on("click", function (e) {
+			var inputFee = $("input", $(this).parent().parent());
+			inputFee.val("0");
+			saveFee(e, globalFeeData);
+		});
+		$(".member50 > a").off().on("click", function (e) {
+			var inputFee = $("input", $(this).parent().parent());
+			inputFee.val((parseInt(inputFee.val()) + 50).toString());
+			saveFee(e, globalFeeData);
+		});
+		$(".member250 > a").off().on("click", function (e) {
+			var inputFee = $("input", $(this).parent().parent());
+			inputFee.val((parseInt(inputFee.val()) + 250).toString());
+			saveFee(e, globalFeeData);
+		});
+	});
+	// Initialize members:
+	$.when($.ajax({ type: "POST", cache: false, url: "/getFee?file=" + fileName + "&lastModified=" + Date.now(), dataType: "xml" }),
+		$.ajax({ type: "POST", cache: false, url: "/getFees?lastModified=" + Date.now(), dataType: "xml" }),
+		$.ajax({ type: "POST", cache: false, url: "/isLoggedIn?lastModified=" + Date.now(), dataType: "text" })).done(function (xmlData, feeData, textData) {
+			// Determine current fee information:
+			globalFeeData = $(xmlData[0]);
+			globalFeeRoot = $("data", globalFeeData);
+			var fileId, filePrev, fileNext, feeNode, index = 0,
+				fees = $("key", feeData[0]),
+				rootId = globalFeeRoot.attr("id"),
+				rootFee = globalFeeRoot.attr("fee");
+			fees.each(function (i) {
+				feeNode = $(this);
+				fileId = feeNode.attr("file");
+				if (fileId == fileName) {
+					var feeVal = feeNode.attr("val");
+					if (isEmptyString(feeVal))
+						feeVal = getLocVal("const-birthday");
+					$("#search-input", _page).text(feeNode.attr("name") + " (" + feeNode.attr("birthday") + ") - " + feeVal);
+					index = i;
+				}
+			});
+			// Generate page:
+			if (textData[0] == "1") {
+				isLoggedIn = true;
+				// Spent funds:
+				$("#spent-input", _page).val(rootFee);
+				// Compute previous and next links:
+				if (index == 0) {
+					filePrev = fees[fees.length - 1];
+					if (fees.length > 1) fileNext = fees[1]; else fileNext = filePrev;
+				} else {
+					filePrev = fees[index - 1];
+					if (index + 1 < fees.length) fileNext = fees[index + 1]; else fileNext = fees[0];
+				}
+				filePrev = $(filePrev).attr("file");
+				fileNext = $(fileNext).attr("file");
+				var filterId = $.getUrlVar("id"), queryId = "";
+				if (filterId != undefined) queryId = "&id=" + filterId;
+				memberLeft.attr("href", "/fee?file=" + filePrev + queryId);
+				memberRight.attr("href", "/fee?file=" + fileNext + queryId);
+				// Iterate members:
+				$("key", xmlData[0]).each(function () {
+					var node = $(this),
+						nodeId = node.attr("id"),
+						nodeName = node.attr("name"),
+						nodeFee = node.attr("fee"),
+						memberClone;
+					// Prepare member record:
+					if ((filterId != undefined && filterId == nodeId) || filterId == undefined) {
+						if (filterId == undefined) queryId = "&id=" + nodeId; else queryId = "";
+						member.attr("data-id", nodeId);
+						memberText.attr("href", "/fee?file=" + fileName + queryId);
+						memberText.text(nodeName);
+						memberInput.val(nodeFee);
+						memberClone = member.clone();
+						memberList.append(memberClone);
+						// Add special classes:
+						if (node.attr("active") == "0") memberClone.addClass("inactive"); else memberClone.addClass("active"); // Activity state.
+						if (rootId == nodeId) memberClone.addClass("host"); // Current record and fee target are the same.
+					}
+				});
+				// Show user interface:
+				$("#management-fee", _page).show();
+			} else {
+				memberList.hide();
+				feeInfo.show();
+			}
+			// Render page:
+			showPage();
+		});
+</script>

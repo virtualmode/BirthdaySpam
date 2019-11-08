@@ -1,0 +1,281 @@
+<!-- Event calendar: -->
+<div id="events">
+	<div class="cal1"></div>
+</div>
+<!-- Fee template: -->
+<div id="member-template" style="display: none">
+	<div class="member">
+		<a class="tag" href="#" target="_self">
+			<div class="member-info">
+				<div class="member-fee"></div>
+				<div class="member-expected"></div>
+			</div>
+		</a>
+	</div>
+</div>
+<!-- Brief: -->
+<div id="brief" class="row"></div>
+<!-- Current fees: -->
+<div id="member-list" class="row" style="display:none"></div>
+<!-- Total fee: -->
+<div id="total-row" class="row" style="display:none">
+	<span id="total"></span>&nbsp;&nbsp;&nbsp;<span id="total-val"></span>
+</div>
+<!-- Comments: -->
+<div id="management-comments" class="rows">
+	<div class="row">
+		<div id="member-comments">Comments:</div>
+		<div id="member-desc" class="desc"></div>
+		<textarea id="comments-input" rows="24" style="display:none"></textarea>
+		<span class="error"></span>
+	</div>
+	<div id="bank" class="row" style="display:none">
+		<div id="management-bank">Bank:</div>
+		<div class="desc"></div>
+		<textarea id="bank-input" rows="8"></textarea>
+		<span class="error"></span>
+	</div>
+	<div id="comments-buttons" class="row-buttons" style="display: none">
+		<a id="btn-save" href="/" class="const-save button">Save</a>
+	</div>
+</div>
+<!-- E-mail: -->
+<div id="management-mail" class="rows" style="display: none">
+	<div class="row">
+		<div id="mail-from">Mailing list from:</div>
+		<div class="desc"></div>
+		<input id="from-input" type="text" name="mail-from" value=""/>
+		<span class="error"></span>
+	</div>
+	<div class="row">
+		<div id="mail-subject">Mailing list subject:</div>
+		<div class="desc"></div>
+		<input id="subject-input" type="text" name="mail-subject" value=""/>
+		<span class="error"></span>
+	</div>
+	<div class="row">
+		<div id="mail-message">Mailing list message:</div>
+		<div class="desc"></div>
+		<textarea id="message-input" rows="24"></textarea>
+		<span class="error"></span>
+	</div>
+	<div id="mail-buttons" class="row-buttons">
+		<a id="btn-mail-save" href="/" class="const-save button">Save</a>
+		<a id="btn-send" href="/" class="const-send button">Send</a>
+		<a id="btn-debug-send" href="/" class="const-debug button">Debug</a>
+	</div>
+</div>
+<!-- Management section: -->
+<div id="management-fee" class="rows" style="display:none">
+	<div>
+		<div id="management-name">Fee:</div>
+		<div id="management-desc" class="desc"></div>
+		<select id="fee-members" name="fee-members"></select>
+		<span id="management-err" class="error"></span>
+	</div>
+	<div>
+		<div id="fee-name">Comment:</div>
+		<div class="desc"></div>
+		<input id="fee-comment" type="text" name="fee-comment" placeholder="Comment" value="" />
+		<span class="error"></span>
+	</div>
+	<div class="row-buttons">
+		<a id="btn-add" href="/" class="const-add button">Add</a>
+	</div>
+</div>
+
+<!-- Page scripts: -->
+<script type="text/javascript">
+	// Cookie helper:
+	function getCookieOrSet(cookieName, cookieDefaultValue) {
+		var cookieResult = $.cookie(cookieName);
+		if (isEmptyString(cookieResult)) {
+			cookieResult = cookieDefaultValue;
+			$.cookie(cookieName, cookieDefaultValue, { expires: 365, path: "/" });
+		}
+		return cookieResult;
+	}
+	// Save mailing list helper:
+	function saveMailingList()
+	{
+		$.cookie("mail_from", $("#from-input").val(), { expires: 365, path: "/" });
+		$.cookie("mail_subject", $("#subject-input").val(), { expires: 365, path: "/" });
+		$.cookie("mail_message", $("#message-input").val(), { expires: 365, path: "/" });
+		//goToTargetHref(e); // Update page. Already contains preventDefault().
+	}
+	// Initialize overview:
+	var requestDate = Date.now();
+	$.when($.ajax({ type: "POST", cache: false, url: "/getBirthdays?lastModified=" + requestDate, dataType: "xml" }),
+		$.ajax({ type: "POST", cache: false, url: "/isLoggedIn?lastModified=" + requestDate, dataType: "text" }),
+		$.ajax({ type: "POST", cache: false, url: "/getFees?lastModified=" + requestDate, dataType: "xml" }),
+		$.ajax({ type: "POST", cache: false, url: "/getProperty?id=comments&lastModified=" + requestDate, dataType: "xml" }),
+		$.ajax({ type: "POST", cache: false, url: "/getProperty?id=bank&lastModified=" + requestDate, dataType: "xml" })).done(function (birthdaysXml, loggedInText, feesXml, commentsXml, bankXml) {
+
+		// Here's some magic to make sure the dates are happening this month.
+		var isLoggedIn = false;
+
+		// Example events to load into calendar:
+		//var thisMonth = moment().format('YYYY-MM'), eventArray = [
+		//	{ title: 'Multi-Day Event', endDate: thisMonth + '-14', startDate: thisMonth + '-10' },
+		//	{ endDate: thisMonth + '-23', startDate: thisMonth + '-21', title: 'Another Multi-Day Event' },
+		//	{ date: thisMonth + '-27', title: 'Single Day Event'}
+		//];
+
+		// Prepare birthdays:
+		var eventArray = [];
+		var $feeMembers = $("#fee-members", _page);
+		$("key", birthdaysXml[0]).each(function() {
+			var node = $(this);
+			var birthday = moment(node.attr("birthday"), "DD.MM.YYYY");
+			// Fill management select box:
+			$feeMembers.append($("<option>", {
+				value: node.attr("id"),
+				text: node.attr("name") + " (" + node.attr("birthday") + ")"
+			}));
+			// Mark all birthdays in this year and january of the next year:
+			if (birthday.month() >= moment().month() - 5)
+				birthday.year(moment().year());
+			else
+				birthday.year(moment().year() + 1);
+			// Add event:
+			eventArray.push({ id: node.attr("id"), title: node.attr("name"), date: birthday.format("YYYY-MM-DD") });
+		});
+
+		// Create calendar:
+		var eventCalendar = $('.cal1', _page).clndr({
+			events: eventArray,
+			clickEvents: {
+				click: function(target) {
+					if (target.events && target.events.length > 0) {
+						var message = "";
+						for (var i = 0; i < target.events.length; i++) {
+							message += "\u2022 " + target.events[i].title + "\r\n";
+						}
+						alert(message);
+					}
+				}
+				//today: function() { console.log('Cal-1 today'); },
+				//nextMonth: function() { console.log('Cal-1 next month'); },
+				//previousMonth: function() { console.log('Cal-1 previous month'); },
+				//onMonthChange: function() { console.log('Cal-1 month changed'); },
+				//nextYear: function() { console.log('Cal-1 next year'); },
+				//previousYear: function() { console.log('Cal-1 previous year'); },
+				//onYearChange: function() { console.log('Cal-1 year changed'); },
+				//nextInterval: function() { console.log('Cal-1 next interval'); },
+				//previousInterval: function() { console.log('Cal-1 previous interval'); },
+				//onIntervalChange: function() { console.log('Cal-1 interval changed'); }
+			},
+			multiDayEvents: {
+				singleDay: 'date',
+				endDate: 'endDate',
+				startDate: 'startDate'
+			},
+			weekOffset: 1,
+			daysOfTheWeek: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+			showAdjacentMonths: true,
+			adjacentDaysChangeMonth: false
+		});
+
+		// Check permissions:
+		if (loggedInText[0] === "1") {
+			isLoggedIn = true;
+			// Prepare management:
+			$("#btn-save", _page).off().on("click", function(e) {
+				var propertyXml = $.parseXML('<?xml version="1.0" encoding="utf-8"?><data><key id="comments" val="' + escapeHtml($("#comments-input").val()) + '"/><key id="bank" val="' + escapeHtml($("#bank-input").val()) + '"/></data>');
+				$.ajax({ type: "POST", cache: false, url: "/setProperty?lastModified=" + Date.now(), dataType: "xml", data: serializeXML(propertyXml) }).fail(function() {
+					alert(getLocVal("const-error"));
+				});
+				goToTargetHref(e); // Update page. Already contains preventDefault().
+			});
+			$("#btn-mail-save", _page).off().on("click", function(e) {
+				saveMailingList();
+				e.preventDefault();
+			});
+			$("#btn-send, #btn-debug-send", _page).off().on("click", function(e) {
+				if (confirm(getLocVal("const-johncena"))) {
+					var propertyXml = $.parseXML('<?xml version="1.0" encoding="utf-8"?><data><key id="mail_from" val="' + $("#from-input").val() + '"/><key id="mail_subject" val="' + $("#subject-input").val() + '"/><key id="mail_message" val="' + escapeHtml($("#message-input").val()) + '"/></data>'),
+						query = "/sendMail?lastModified=" + Date.now();
+					if ($(this).attr("id") != "btn-send") {
+						query += "&debug=1";
+					}
+					$.ajax({ type: "POST", cache: false, url: query, dataType: "xml", data: serializeXML(propertyXml) }).fail(function () {
+						alert(getLocVal("const-error"));
+					});
+					saveMailingList();
+				}
+				e.preventDefault();
+			});
+			$("#btn-add", _page).off().on("click", function(e) {
+				$.ajax({ type: "POST", cache: false, url: "/addBirthday?id=" + $("#fee-members").val() + "&comment=" + $("#fee-comment").val() + "&lastModified=" + Date.now() });
+				goToTargetHref(e); // Update page. Already contains preventDefault().
+			});
+			$("#management-mail", _page).show();
+			$("#management-fee", _page).show();
+			$("#comments-buttons", _page).show();
+			$("#comments-input", _page).show();
+			$("#comments-input", _page).val(unescape($("key[id='comments']", commentsXml[0]).attr("val")));
+			$("#bank", _page).show();
+			$("#bank-input", _page).val($("key[id='bank']", bankXml[0]).attr("val"));
+			// Fill mailing list:
+			$("#from-input", _page).val(getCookieOrSet("mail_from", getLocVal("const-from")));
+			$("#subject-input", _page).val(getCookieOrSet("mail_subject", getLocVal("const-subject")));
+			$("#message-input", _page).val(getCookieOrSet("mail_message", getLocVal("const-message")));
+			
+		}
+		$("#member-desc", _page).html($("key[id='comments']", commentsXml[0]).attr("val"));
+
+		// Prepare current fees:
+		var i = 0, total = 0, expected = 0,
+			memberList = $("#member-list", _page),
+			member = $("#member-template > div", _page),
+			memberHref = $("a.tag", member),
+			memberExpected = $(".member-expected", memberHref),
+			memberFee = $(".member-fee", memberHref);
+		$("key", feesXml[0]).each(function() {
+			// Generate page:
+			var memberNode = $(this),
+				memberComment = memberNode.attr("val");
+			if (isEmptyString(memberComment)) {
+				memberComment = getLocVal("const-birthday") + " " + memberNode.attr("birthday");
+			}
+			memberHref.attr("href", "/fee?file=" + memberNode.attr("file"));
+			memberHref.contents().first().replaceWith(memberNode.attr("name"));
+			memberExpected.text(memberComment);
+			if (isLoggedIn) { // Show fee for admins:
+				memberFee.text(memberNode.attr("fee") + " \u20bd");
+			}
+			memberList.append(member.clone());
+			// Compute total and expected:
+			total += parseInt(memberNode.attr("fee"));
+			expected += parseInt(memberNode.attr("expected"));
+			i++;
+		});
+
+		// Prepare events:
+		$(".member-expected, .member-fee", _page).off().on("click", function(e) {
+			e.stopPropagation();
+			goToTargetHref(e, $(this).parent().parent().attr("href"));
+		});
+
+		// Show brief help:
+		if (i > 0) {
+			var totalString = total.toString() + " \u20bd";
+			if (isLoggedIn == true)
+				totalString += " <span>~ " + expected.toString() + " \u20bd</span>"; // Show expected for admins.
+			$("#brief", _page).text(getLocVal("const-brief"));
+			$("#total-val", _page).html(totalString);
+			$("#total-row", _page).show();
+			memberList.show();
+		} else {
+			$("#brief", _page).text(getLocVal("const-brief-empty"));
+		}
+
+		// Render page:
+		$("#tag-overview", _page).addClass("checked");
+		$("#search-input", _page).text(getLocVal("birthdays-overview"));
+		showPage();
+
+	}).fail(function() {
+		alert(getLocVal("const-error"));
+	});
+</script>

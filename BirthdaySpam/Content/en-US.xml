@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<data id="en-US" val="English">
+
+	<key id="lng-author" val="Ivanov Ivan Ivanovich"/>
+	<key id="lng-email" val="IvanovII@elcomplus.ru"/>
+	<!-- Пример использования кода символа (&#x; - в 16-ой сс, &#; в десятичной). Спец.символы: &amp; (&), &lt; (<), &gt; (>), &apos; (') и &quot; ("). -->
+
+	<!-- Common: -->
+	<key id="const-yes" val="Yes"/>
+	<key id="const-no" val="No"/>
+	<key id="const-save" val="Save"/>
+	<key id="const-default" val="By Default"/>
+	<key id="const-new" val="New"/>
+	<key id="const-add" val="Add"/>
+	<key id="const-edit" val="Edit"/>
+	<key id="const-delete" val="Delete"/>
+	<key id="const-close" val="Close"/>
+	<key id="const-send" val="Send"/>
+	<key id="const-debug" val="Debug"/>
+	<key id="const-error" val="Unknown error was occured."/>
+	<key id="const-johncena" val="Are you sure about that?"/>
+	<key id="const-from" val="IvanovII@elcomplus.ru"/>
+	<key id="const-subject" val="Дни рождения"/>
+	<key id="const-birthday" val="Birthday"/>
+	<key id="const-message" val="Добрый день!&lt;br/&gt;&lt;br/&gt;&#13;&#10;&#13;&#10;В ближайшее время свой день рождения будут отмечать:&lt;br/&gt;&#13;&#10;BIRTHDAY_BOYS.&lt;br/&gt;&lt;br/&gt;&#13;&#10;Дополнительную информацию можно посмотреть по следующей &lt;a href='http://192.168.36.168:8089'&gt;ссылке&lt;/a&gt;.&lt;br/&gt;&lt;br/&gt;&#13;&#10;&#13;&#10;&lt;div style='font-family:Courier New,monospace;color:RANDOM_HEX_COLOR;white-space:pre;'&gt;&#13;&#10;        ▄███▄▄▄&#13;&#10;      █ ██▀ ▀▀██▄&#13;&#10;     ██▄█ ██   ▀██▄&#13;&#10;    ████▄ ▀██▄▄  ▀█&#13;&#10;    ██████▄  ▀▀▀  ▄▄&#13;&#10;█▄▄ ███████▀▄▄████▀&#13;&#10; ▀████████ ▄████▀&#13;&#10;  ▀███████ ████▀&#13;&#10;    ██████ ███▀&#13;&#10;      ▀▀▀▀ █▀▀&#13;&#10;       ▄█  ▄▄▄▄▄▄▄&#13;&#10;       █▀ ▄████▀▀&#13;&#10;      ▄█&#13;&#10;      █▀&#13;&#10;      █&#13;&#10;      █&#13;&#10;      █&#13;&#10;      ▀&#13;&#10;&lt;/div&gt;&lt;br/&gt;&#13;&#10;&#13;&#10;Автоматическая система рассылки"/>
+	<key id="const-brief" val="We are collecting money for the following birthdays and events. You think you are chipping in for:"/>
+	<key id="const-brief-empty" val="No upcoming events. Your money is safe... for now."/>
+
+	<!-- Settings: -->
+	<key id="tag-stngs" val="Settings"/>
+	<key id="tag-login" val="Login"/>
+	<key id="btn-login" val="Login"/>
+	<key id="btn-logout" val="Logout"/>
+	<key id="logout-desc" val="You are logged in as administrator."/>
+	<key id="login-name" val="Login:"/>
+	<key id="password-name" val="Password:"/>
+	<key id="lang-name" val="Language:"/>
+	<!--key id="tag-stngs" attr="href" val="/settings"/-->
+	<!-- Важен порядок для записей с одним id. Т.к. в некоторых местах интерфейс сам подгружает языковые сообщения по некоторому номеру или первый попавшийся. -->
+
+	<!-- Overview: -->
+	<key id="tag-overview" val="Overview"/>
+	<key id="tag-fee" val="Fee"/>
+	<key id="birthdays-overview" val="Events overview"/>
+	<key id="management-name" val="Fee management:"/>
+	<key id="management-bank" val="Bank:"/>
+	<key id="mail-from" val="Mailing list from:"/>
+	<key id="mail-subject" val="Mailing list subject:"/>
+	<key id="mail-message" val="Mailing list message:"/>
+	<key id="fee-name" val="Comment:"/>
+	<key id="fee-comment" attr="placeholder" val="Birthday"/>
+	<key id="fee-comment" attr="value" val=""/>
+	<key id="fee-info" val="You are not authorized to view details."/>
+	<key id="fee-spent" val="Spent funds:"/>
+	<key id="total" val="Honey, thank you for my pocket money:"/>
+
+	<!-- Members: -->
+	<key id="tag-members" val="Members"/>
+	<key id="member-name" val="Name:"/>
+	<key id="member-birthday" val="Birthday:"/>
+	<key id="member-department" val="Department:"/>
+	<key id="member-comments" val="Comments:"/>
+	<key id="member-active" val="Active:"/>
+
+</data>

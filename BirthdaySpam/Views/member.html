@@ -1,0 +1,120 @@
+<!-- Member: -->
+<form id="form-member" class="rows" method="post" action="/" autocomplete="off">
+	<!-- autocomplete - недокументированный способ отключить у браузеров автосохранение пароля с формы. -->
+	<div>
+		<div id="member-name">Name:</div>
+		<div class="desc"></div>
+		<input id="name-input" type="text"/>
+		<span class="error"></span>
+	</div>
+	<div>
+		<div id="member-birthday">Birthday:</div>
+		<div class="desc"></div>
+		<input id="birthday-input" type="text"/>
+		<span class="error"></span>
+	</div>
+	<div>
+		<div id="member-department">Department:</div>
+		<div class="desc"></div>
+		<input id="department-input" type="text"/>
+		<span class="error"></span>
+	</div>
+	<div>
+		<div>E-mail:</div>
+		<div class="desc"></div>
+		<input id="email-input" type="text"/>
+		<span class="error"></span>
+	</div>
+	<div class="row">
+		<div id="member-comments">Comments:</div>
+		<div class="desc"></div>
+		<textarea id="comments-input" rows="8"></textarea>
+		<span class="error"></span>
+	</div>
+	<div id="member-active-arg" class="row-radios" style="display:none">
+		<div id="member-active">Active:</div>
+		<div class="desc"></div>
+		<input id="active1" name="active" type="radio" value="1"/><label for="active1" class="const-yes">Yes</label>
+		<input id="active0" name="active" type="radio" value="0"/><label for="active0" class="const-no">No</label>
+	</div>
+	<div id="member-buttons" class="row-buttons" style="display:none">
+		<a id="btn-save" href="#" class="const-save button">Save</a>
+		<a id="btn-delete" href="/members" class="const-delete button">Delete</a>
+	</div>
+</form>
+
+<!-- Page scripts: -->
+<script type="text/javascript">
+	var request = getDecodedUrl().toLowerCase(),
+		isEditing = $.getUrlVar("id") != undefined,
+		query = request.substr(request.indexOf("?") + 1),
+		isLoggedIn = false,
+		memberNode, id;
+	// Page event on show:
+	_page.on("onshow", function() {
+		// Delete button:
+		$("#btn-delete").off().on("click", function(e) {
+			if (confirm(getLocVal("const-johncena"))) {
+				$.ajax({ type: "POST", cache: false, url: "/deleteMember?lastModified=" + Date.now() + "&id=" + id, dataType: "xml" });
+				goToTargetHref(e); // Update page. Already contains preventDefault().
+			} else {
+				e.preventDefault();
+			}
+		});
+		// Save button:
+		$("#btn-save").off().on("click", function(e) {
+			// Activity flag:
+			var active = "1";
+			if (document.getElementById("active0").checked)
+				active = "0";
+			// Generate XML:
+			var memberXml = $.parseXML('<?xml version="1.0" encoding="utf-8"?><data><key id="' + id + '" active="' + active + '" name="' + $("#name-input").val() + '" birthday="' + $("#birthday-input").val() + '" department="' + $("#department-input").val() + '" email="' + $("#email-input").val() + '" val="' + escapeHtml($("#comments-input").val()) + '"/></data>');
+			var setSaveRequest = "/setMember?lastModified=" + Date.now();
+			if (isEditing) {
+				this.href = "/member?id=" + id;
+				setSaveRequest += "&id=" + id;
+			}
+			$.ajax({ type: "POST", cache: false, url: setSaveRequest, dataType: "xml", data: serializeXML(memberXml) }).fail(function() {
+				alert(getLocVal("const-error"));
+			});
+			goToTargetHref(e); // Update page. Already contains preventDefault().
+		});
+	});
+
+	$.when($.ajax({ type: "POST", cache: false, url: "/isLoggedIn?lastModified=" + Date.now(), dataType: "text" })).then(function(data, textStatus, jqXHR) {
+		if (data == "1") {
+			isLoggedIn = true;
+			$("#member-active-arg", _page).show();
+			$("#member-buttons", _page).show();
+		}
+		// Get member or create new:
+		if (isEditing) { // Edit member:
+			$.when($.ajax({ type: "POST", cache: false, url: "/getMember?lastModified=" + Date.now() + "&" + query, dataType: "xml" })).then(function(xmlData, textStatus, jqXHR) {
+					// Generate page:
+					$("key", xmlData).each(function() {
+						memberNode = $(this);
+						id = memberNode.attr("id");
+						$("#search-input", _page).text(memberNode.attr("name"));
+						$("#name-input", _page).val(memberNode.attr("name"));
+						$("#birthday-input", _page).val(memberNode.attr("birthday"));
+						$("#department-input", _page).val(memberNode.attr("department"));
+						$("#email-input", _page).val(memberNode.attr("email"));
+						$("#comments-input", _page).val(memberNode.attr("val"));
+						// Activitiy flag:
+						$("#active" + memberNode.attr("active"), _page).attr("checked", "checked");
+					});
+					// Render page:
+					showPage();
+				},
+				function() { // Fail:
+				});
+		} else { // Add new member:
+			$("#search-input", _page).text(getLocVal("const-new"));
+			$("#btn-save", _page).text(getLocVal("const-add"));
+			$("#btn-delete", _page).css("display", "none");
+			$("#active1", _page).attr("checked", "checked");
+			showPage();
+		}
+	}, function() { // Fail:
+	});
+</script>

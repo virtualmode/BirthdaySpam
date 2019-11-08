@@ -1,0 +1,31 @@
+<!-- Navigation tags: -->
+<div id="tags-wrap" class="tags">
+	<a id="tag-overview" href="/" target="_self">Overview<span class="tag-wnd">0</span></a>
+	<a id="tag-members" href="/members" target="_self">Members<span class="tag-wnd">0</span></a>
+	<a id="tag-stngs" href="/settings" target="_self">Settings</a>
+</div>
+
+<!-- Title: -->
+<div id="search"><div id="search-input" type="text" value=""></div><div id="search-width"></div></div>
+
+<!-- Content holder: -->
+<div id="content" class="rows"></div>
+
+<!-- Service footer: -->
+<div id="footer">
+	<div id="elcomplus"></div>
+</div>
+
+<!-- Page script: -->
+<script type="text/javascript">
+	// Get fee count:
+	$.when($.ajax({ type: "POST", cache: false, url: "/getFeeCount?lastModified=" + Date.now(), dataType: "text" })).then(function(data, textStatus, jqXHR) {
+		$("#tag-overview > span", _page).text(data);
+	}, function() { // Fail:
+	});
+	// Get member count:
+	$.when($.ajax({ type: "POST", cache: false, url: "/getMemberCount?lastModified=" + Date.now(), dataType: "text" })).then(function(data, textStatus, jqXHR) {
+		$("#tag-members > span", _page).text(data);
+	}, function() { // Fail:
+	});
+</script>

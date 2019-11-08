@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+  <key id="login" val="root"/>
+  <key id="password" val="root"/>
+  <key id="session" val=""/>
+  <key id="network_login" val="IvanovII"/>
+  <key id="network_password" val=""/>
+  <key id="network_domain" val="ELCOM"/>
+  <key id="smtp_domain" val="mail.elcomplus.ru"/>
+  <key id="http_port" val="8089"/>
+  <key id="https_port" val="8443"/>
+</data>

@@ -1,0 +1,50 @@
+<!-- Member template: -->
+<div id="member-template" style="display: none">
+	<div class="member">
+		<a class="tag" href="#" target="_self">
+			<div class="member-info">
+				<div class="member-expected"></div>
+			</div>
+		</a>
+	</div>
+</div>
+
+<!-- Member list: -->
+<div id="member-list" class="row"></div>
+
+<!-- Add member button: -->
+<div id="members-buttons" class="row" style="display:none">
+	<a href="/member" target="_self" class="const-add button"></a>
+</div>
+
+<!-- Page scripts: -->
+<script type="text/javascript">
+	$("#search-input", _page).text(getLocVal("tag-members"));
+	$("#tag-members", _page).addClass("checked");
+	// Initialize members:
+	var isLoggedIn = false,
+		memberList = $("#member-list", _page),
+		member = $("#member-template > div", _page),
+		memberHref = $("a.tag", member),
+		memberExpected = $(".member-expected", memberHref);
+	$.when($.ajax({ type: "POST", cache: false, url: "/getMembers?lastModified=" + Date.now(), dataType: "xml" })).then(function(xmlData, textStatus, jqXHR) {
+		$.when($.ajax({ type: "POST", cache: false, url: "/isLoggedIn?lastModified=" + Date.now(), dataType: "text" })).then(function(data, textStatus, jqXHR) {
+			if (data == "1") {
+				isLoggedIn = true;
+				$("#members-buttons", _page).show();
+			}
+			// Generate page:
+			$("key", xmlData).each(function() {
+				var memberNode = $(this);
+				memberHref.attr("href", "/member?id=" + memberNode.attr("id"));
+				memberHref.contents().first().replaceWith(memberNode.attr("name"));
+				memberExpected.text(memberNode.attr("birthday"));
+				memberList.append(member.clone());
+			});
+			// Render page:
+			showPage();
+		}, function() { // Fail:
+		});
+	}, function() { // Fail:
+	});
+</script>
