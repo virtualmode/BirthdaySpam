@@ -5,3 +5,7 @@ obj/
 [Dd]ebug/
 [Rr]elease/
 packages/
+
+# Visual Studio Code
+.vscode/
+

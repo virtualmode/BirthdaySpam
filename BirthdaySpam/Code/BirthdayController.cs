@@ -24,12 +24,12 @@ namespace BirthdaySpam.Code
         private const string CULTURE_INFO_RU_RU = "ru-RU";
         private const string CULTURE_INFO_EN_US = "en-US";
 
-        private const string BIRTHDAYS_PATH = "Birthdays\\";
-        private const string BIRTHDAYS_ARCHIVE_SUBPATH = "Archive\\";
+        private const string BIRTHDAYS_PATH = "Birthdays/";
+        private const string BIRTHDAYS_ARCHIVE_SUBPATH = "Archive/";
         private const string SETTINGS_FILE = "Settings.xml";
         private const string MEMBERS_FILE = "Members.xml";
         private const string PROPERTIES_FILE = "Properties.xml";
-        private const string DEFAULT_FILE = "Views\\index.html";
+        private const string DEFAULT_FILE = "Views/index.html";
         private const string LANGUAGE_COOKIE = "language";
         private const string LANGUAGE_DEFAULT = CULTURE_INFO_RU_RU;
         private const string SESSION_COOKIE = "session";
@@ -180,7 +180,7 @@ namespace BirthdaySpam.Code
             _properties.Load(PROPERTIES_FILE);
 
             // Load all supported languages:
-            string[] files = Directory.GetFiles("Content\\", "*.xml", SearchOption.TopDirectoryOnly);
+            string[] files = Directory.GetFiles("Content/", "*.xml", SearchOption.TopDirectoryOnly);
             _languages.Clear();
             foreach (var file in files)
             {
@@ -831,7 +831,7 @@ namespace BirthdaySpam.Code
 
                 context.Response.OutputStream.Close();
             }
-            catch (Exception ex)
+            catch
             {
                 //_logger.Error(() => $"On HTTP request error: {ex.Message}");
             }
