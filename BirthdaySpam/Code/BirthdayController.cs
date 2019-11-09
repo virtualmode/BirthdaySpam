@@ -36,6 +36,7 @@ namespace BirthdaySpam.Code
         private const string MACROS_BIRTHDAY_BOYS_RU_RU = "BIRTHDAY_BOYS";
         private const string MACROS_RANDOM_HEX_COLOR = "RANDOM_HEX_COLOR";
 
+        private const int MAX_LOGIN_ATTEMPTS = 5;
         private const int BIRTHDAY_WRITE_ATTEMPTS = 16;
         private const int BIRTHDAY_DEFAULT_FEE = 250;
         private const int BIRTHDAY_MIN_FEE = 100; // Limit to send mails.
@@ -58,7 +59,15 @@ namespace BirthdaySpam.Code
         public readonly int HttpPort;
         public readonly int HttpsPort;
 
+        private int _loginAttempts;
+
         #endregion Fields
+
+        #region Properties
+
+        public string Address => $"http://localhost:{HttpPort}";
+
+        #endregion Properties
 
         #region Constructors
 
@@ -72,6 +81,7 @@ namespace BirthdaySpam.Code
             _members = new XmlData();
             _properties = new XmlData();
             _languages = new Dictionary<string, XmlData>();
+            _loginAttempts = 0;
             LoadSettings();
             if (!int.TryParse(_settings.Keys[XmlData.HTTP_PORT][XmlData.VAL], out HttpPort)) HttpPort = 8089;
             if (!int.TryParse(_settings.Keys[XmlData.HTTPS_PORT][XmlData.VAL], out HttpsPort)) HttpsPort = 8443;
@@ -738,6 +748,9 @@ namespace BirthdaySpam.Code
                         break;
 
                     case "/getSession": // TODO: Security lack!
+                        if (_loginAttempts > MAX_LOGIN_ATTEMPTS)
+                            break; // Prevent password brute force.
+
                         args = GetArgs(context.Request.Url.Query);
                         // Send session cookie to the client:
                         context.Response.ContentType = "text/plain";
@@ -752,6 +765,10 @@ namespace BirthdaySpam.Code
                                 args[XmlData.PASSWORD] == _settings.Keys[XmlData.PASSWORD][XmlData.VAL])
                             {
                                 writer.Write("{0}", _settings.Keys[SESSION_COOKIE][XmlData.VAL]);
+                            }
+                            else
+                            {
+                                _loginAttempts++;
                             }
                         }
                         break;

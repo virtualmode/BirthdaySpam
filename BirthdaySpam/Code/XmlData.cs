@@ -9,7 +9,7 @@ namespace BirthdaySpam.Code
     using System.Linq;
     using System.Xml;
 
-    using NLog;
+    //using NLog;
 
     public class XmlData
     {
@@ -49,7 +49,7 @@ namespace BirthdaySpam.Code
 
         #region Fields
 
-        private readonly Logger _logger;
+        //private readonly Logger _logger;
         private readonly XmlDocument _xml;
 
         #endregion Fields
@@ -69,7 +69,7 @@ namespace BirthdaySpam.Code
         /// </summary>
         public XmlData()
         {
-            _logger = LogManager.GetCurrentClassLogger();
+            //_logger = LogManager.GetCurrentClassLogger();
             _xml = new XmlDocument();
             _xml.LoadXml("<?xml version=\"1.0\" encoding=\"utf-8\"?><data></data>");
             Keys = new Dictionary<string, Dictionary<string, string>>();

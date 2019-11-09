@@ -61,29 +61,38 @@ namespace BirthdaySpam.Code
             _listener.Start();
             _started = true;
 
-            _listenerThread?.Abort();
             _listenerThread = new Thread(Listen);
             _listenerThread.Start();
         }
 
         public void Stop()
         {
+            _started = false; // Set flag first to terminate listener appropriate way.
+
             _listener.Stop();
             if (_listenerThread != null)
             {
-                _listenerThread.Abort();
+                _listenerThread.Join();
                 _listenerThread = null;
             }
-            _started = false;
         }
 
         /// <summary>
         /// Handle HTTP request.
         /// </summary>
-        /// <param name="context"></param>
-        private void HttpRequest(object context)
+        /// <param name="result"></param>
+        private void HttpRequest(IAsyncResult result)
         {
-            OnHttpRequest?.Invoke(context as HttpListenerContext);
+            try
+            {
+                HttpListener listener = (HttpListener)result.AsyncState;
+                HttpListenerContext context = listener.EndGetContext(result);
+                OnHttpRequest?.Invoke(context);
+            }
+            catch
+            {
+                // TODO: Can't handle request.
+            }
         }
 
         private void Listen()
@@ -92,7 +101,8 @@ namespace BirthdaySpam.Code
             {
                 while (_started && _listener.IsListening)
                 {
-                    ThreadPool.QueueUserWorkItem(HttpRequest, _listener.GetContext());
+                    IAsyncResult result = _listener.BeginGetContext(new AsyncCallback(HttpRequest), _listener);
+                    result.AsyncWaitHandle.WaitOne();
                 }
             }
             catch

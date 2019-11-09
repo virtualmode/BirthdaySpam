@@ -6,7 +6,6 @@
 namespace BirthdaySpam
 {
     using System;
-    using System.Diagnostics;
 
     using Code;
 
@@ -26,20 +25,37 @@ namespace BirthdaySpam
         /// <param name="args"></param>
         static void Main(string[] args)
         {
+            Console.WriteLine("Birthday Spam 1.0");
+
             // Initialize birthday controller:
             _birthdayController = new BirthdayController();
             _birthdayController.Start();
 
-            Console.WriteLine("Hello World!");
-        }
+            Console.WriteLine($"Service started at {_birthdayController.Address}");
+            Console.WriteLine("Press <Q> then <Enter> to stop service.");
+            Console.WriteLine();
 
-        private static void Open()
-        {
-            Process.Start($"http://localhost:{_birthdayController.HttpPort}");
+            int key; // Current user command.
+            while ((key = Console.Read()) != 113 && key != 81) // Awaiting Q.
+            {
+                switch(key)
+                {
+                    case 10: // Enter. Nothing to do.
+                    case 13:
+                        break;
+
+                    default:
+                        Console.WriteLine($"Unknown command coed = {key}.");
+                        break;
+                }
+            }
+
+            Exit();
         }
 
         private static void Exit()
         {
+            Console.WriteLine("Stopping service...");
             _birthdayController.Stop();
         }
 
