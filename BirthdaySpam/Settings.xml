@@ -7,6 +7,6 @@
   <key id="network_password" val=""/>
   <key id="network_domain" val="ELCOM"/>
   <key id="smtp_domain" val="mail.elcomplus.ru"/>
-  <key id="http_port" val="8089"/>
+  <key id="http_port" val="8080"/>
   <key id="https_port" val="8443"/>
 </data>

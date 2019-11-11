@@ -243,7 +243,7 @@ namespace BirthdaySpam.Code
             XmlData birthdays = new XmlData();
             DateTime today = DateTime.Now.Date; // Start of day.
             List<Dictionary<string, string>> orderedBirthdays = _members.Keys.Values
-                .Select(e => new { Attribute = e, Birthday = DateTime.Parse(e[XmlData.BIRTHDAY]) })
+                .Select(e => new { Attribute = e, Birthday = DateTime.ParseExact(e[XmlData.BIRTHDAY], "dd.MM.yyyy", null) })
                 .Select(e => new { e.Attribute, Date = new DateTime(e.Birthday.Month >= today.Month ? today.Year : today.Year + 1, e.Birthday.Month, e.Birthday.Day) })
                 .OrderBy(d => d.Date.Year)
                 .ThenBy(d => d.Date.Month)
@@ -369,7 +369,7 @@ namespace BirthdaySpam.Code
         {
             XmlData members = new XmlData();
             List<Dictionary<string, string>> orderedBirthdays = _members.Keys.Values
-                .Select(e => new { Attribute = e, Birthday = DateTime.Parse(e[XmlData.BIRTHDAY]) })
+                .Select(e => new { Attribute = e, Birthday = DateTime.ParseExact(e[XmlData.BIRTHDAY], "dd.MM.yyyy", null) })
                 .OrderBy(d => d.Birthday.Month)
                 .ThenBy(d => d.Birthday.Day)
                 .Select(s => s.Attribute)
