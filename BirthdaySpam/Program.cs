@@ -6,6 +6,7 @@
 namespace BirthdaySpam
 {
     using System;
+    using System.Globalization;
 
     using Code;
 
@@ -25,9 +26,13 @@ namespace BirthdaySpam
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            Console.WriteLine("Birthday Spam 1.0");
+            // Set default culture info to prevent problems on different platforms:
+            var cultureInfo = new CultureInfo(BirthdayController.CULTURE_INFO_RU_RU);
+            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
             // Initialize birthday controller:
+            Console.WriteLine("Birthday Spam 1.0");
             _birthdayController = new BirthdayController();
             _birthdayController.Start();
 

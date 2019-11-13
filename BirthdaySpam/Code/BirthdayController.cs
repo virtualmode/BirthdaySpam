@@ -13,6 +13,7 @@ namespace BirthdaySpam.Code
     using System.Net;
     using System.Net.Mail;
     using System.Text;
+    using System.Threading;
     using System.Xml;
 
     //using NLog;
@@ -21,8 +22,8 @@ namespace BirthdaySpam.Code
     {
         #region Constants
 
-        private const string CULTURE_INFO_RU_RU = "ru-RU";
-        private const string CULTURE_INFO_EN_US = "en-US";
+        public const string CULTURE_INFO_RU_RU = "ru-RU";
+        public const string CULTURE_INFO_EN_US = "en-US";
 
         private const string BIRTHDAYS_PATH = "Birthdays/";
         private const string BIRTHDAYS_ARCHIVE_SUBPATH = "Archive/";
@@ -243,7 +244,7 @@ namespace BirthdaySpam.Code
             XmlData birthdays = new XmlData();
             DateTime today = DateTime.Now.Date; // Start of day.
             List<Dictionary<string, string>> orderedBirthdays = _members.Keys.Values
-                .Select(e => new { Attribute = e, Birthday = DateTime.ParseExact(e[XmlData.BIRTHDAY], "dd.MM.yyyy", null) })
+                .Select(e => new { Attribute = e, Birthday = DateTime.Parse(e[XmlData.BIRTHDAY]) })
                 .Select(e => new { e.Attribute, Date = new DateTime(e.Birthday.Month >= today.Month ? today.Year : today.Year + 1, e.Birthday.Month, e.Birthday.Day) })
                 .OrderBy(d => d.Date.Year)
                 .ThenBy(d => d.Date.Month)
@@ -369,7 +370,7 @@ namespace BirthdaySpam.Code
         {
             XmlData members = new XmlData();
             List<Dictionary<string, string>> orderedBirthdays = _members.Keys.Values
-                .Select(e => new { Attribute = e, Birthday = DateTime.ParseExact(e[XmlData.BIRTHDAY], "dd.MM.yyyy", null) })
+                .Select(e => new { Attribute = e, Birthday = DateTime.Parse(e[XmlData.BIRTHDAY]) })
                 .OrderBy(d => d.Birthday.Month)
                 .ThenBy(d => d.Birthday.Day)
                 .Select(s => s.Attribute)
@@ -504,7 +505,6 @@ namespace BirthdaySpam.Code
             }
 
             // Compute groups to send letters:
-            CultureInfo cultureRuRu = CultureInfo.GetCultureInfo(CULTURE_INFO_RU_RU);
             StringBuilder debugMessage = new StringBuilder();
             var groups = GetCombinations(fees);
             List<BirthdayBoy> sent = new List<BirthdayBoy>();
@@ -523,7 +523,7 @@ namespace BirthdaySpam.Code
                 foreach (BirthdayBoy boy in boys)
                 {
                     DateTime birthday = new DateTime(DateTime.Now.Year, boy.Birthday.Month, boy.Birthday.Day); // Birthday in this year.
-                    string dayOfWeek = cultureRuRu.DateTimeFormat.GetDayName(birthday.DayOfWeek).ToLower();
+                    string dayOfWeek = Thread.CurrentThread.CurrentCulture.DateTimeFormat.GetDayName(birthday.DayOfWeek).ToLower();
                     macrosBirthdayBoysRuRu += $"{boy.Name} - {(string.IsNullOrEmpty(boy.Val) ? $"{birthday:d MMMM} ({dayOfWeek})" : $"{boy.Val}")}";
                     debugMessage.Append($"<b>{boy.Name} <a href='mailto:{boy.Email}'>{boy.Email}</a></b>");
                     if (boys.IndexOf(boy) < boys.Count - 1)
